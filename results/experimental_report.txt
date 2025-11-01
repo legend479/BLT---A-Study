@@ -2,106 +2,53 @@
 BLT vs BASELINE: COMPREHENSIVE EXPERIMENTAL REPORT
 ================================================================================
 
-Generated on: 2025-10-31 21:58:08
-Total experiment time: 1053.2 seconds
+Generated on: 2025-11-01 17:01:24
+Total experiment time: 0.0 seconds
 
 EXPERIMENTAL CONFIGURATION
 --------------------------------------------------------------------------------
-Training epochs: 10
-Evaluation beam width: 1
-Hyperparameter tuning: Yes
-
-HYPERPARAMETER TUNING RESULTS
---------------------------------------------------------------------------------
-
-BLT Model Tuning:
-  Total combinations tested: 12
-  Successful runs: 10
-  Best validation score: -0.1311
-  Best parameters:
-    lr: 0.001
-    d_model: 256
-    nhead: 8
-    num_layers: 3
-    dim_feedforward: 512
-    dropout: 0.2
-    batch_size: 16
-
-BASELINE Model Tuning:
-  Total combinations tested: 6
-  Successful runs: 6
-  Best validation score: -1.2446
-  Best parameters:
-    lr: 0.001
-    d_model: 256
-    nhead: 8
-    num_layers: 2
-    dim_feedforward: 512
-    dropout: 0.1
-    batch_size: 64
-
-Hyperparameter Insights:
-
-  • Learning Rate: BLT=0.001, Baseline=0.001
-  • Model Dimension: BLT=256, Baseline=256
-  • Attention Heads: BLT=8, Baseline=8
-  • Layers: BLT=3, Baseline=2
-  • Batch Size: BLT=16, Baseline=64
+Training epochs: 100
+Evaluation beam width: 5
+Hyperparameter tuning: No
 
 MODEL PERFORMANCE RESULTS
 --------------------------------------------------------------------------------
 
 Metric                    BLT             Baseline        Difference     
 ----------------------------------------------------------------------
-Exact Match Accuracy      0.00%           0.00%           +0.00%         
-Character Accuracy        13.17%          11.60%          +1.57%         
-Avg Edit Distance         46.27           47.20           -0.93          
-Max Edit Distance         194.00          190.00          +4.00          
-Avg Length Diff           4.29            3.30            +0.99          
+Exact Match Accuracy      48.90%          75.15%          -26.25%        
+Character Accuracy        74.91%          86.16%          -11.25%        
+Avg Edit Distance         2.08            1.05            +1.03          
+Max Edit Distance         141.00          143.00          -2.00          
+Avg Length Diff           0.61            0.37            +0.24          
 Evaluation Time           0.00s           0.00s           +0.00s         
 
 Total Test Samples: 2000
-BLT Correct: 0
-Baseline Correct: 0
+BLT Correct: 978
+Baseline Correct: 1503
 
 PERFORMANCE BY INPUT LENGTH
 --------------------------------------------------------------------------------
 Length Range    BLT Acc      Baseline Acc    Difference   Samples   
 ----------------------------------------------------------------
-0-20              0.00%       0.00%         +0.00%         38
-100-200           0.00%       0.00%         +0.00%        465
-20-50             0.00%       0.00%         +0.00%        542
-50-100            0.00%       0.00%         +0.00%        955
-
-TRAINING ANALYSIS
---------------------------------------------------------------------------------
-
-BLT Training:
-  Final training loss: 2.0754
-  Total training time: 719.8s
-  Average epoch time: 359.9s
-  Epochs completed: 2
-
-Baseline Training:
-  Final training loss: 2.1124
-  Total training time: 45.6s
-  Average epoch time: 22.8s
-  Epochs completed: 2
+0-20             36.84%      97.37%        -60.53%         38
+100-200          32.90%      49.89%        -16.99%        465
+20-50            57.38%      90.22%        -32.84%        542
+50-100           52.36%      78.01%        -25.65%        955
 
 STATISTICAL ANALYSIS
 --------------------------------------------------------------------------------
 
-Accuracy Difference: 0.00%
-Standard Error: 0.00%
-Z-Score: 0.00
-Significance (α=0.05): Not Significant
+Accuracy Difference: 26.25%
+Standard Error: 1.48%
+Z-Score: 17.77
+Significance (α=0.05): Highly Significant
 
 KEY FINDINGS
 --------------------------------------------------------------------------------
 
-• BLT and baseline show comparable performance (difference: 0.00%)
-• BLT produces outputs closer to targets (avg edit distance: 46.27 vs 47.20)
-• Hyperparameter tuning was performed to optimize both models
+• Baseline outperforms BLT by 26.25% in exact match accuracy
+• Performance improves on longer sequences (0-20: 36.8% vs 50-100: 52.4%)
 
 CONCLUSIONS
 --------------------------------------------------------------------------------
@@ -111,10 +58,6 @@ CONCLUSIONS
 
 2. The entropy-based patching mechanism successfully segments input
    sequences, potentially reducing sequence length and computational cost.
-
-3. Hyperparameter tuning reveals that optimal configurations may differ
-   between BLT and baseline models, emphasizing the importance of
-   model-specific optimization.
 
 4. This implementation provides a solid foundation for further research into
    byte-level transformer architectures and patch-based sequence processing.

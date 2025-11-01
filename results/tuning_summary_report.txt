@@ -2,31 +2,46 @@
 HYPERPARAMETER TUNING SUMMARY REPORT
 ================================================================================
 
-Generated on: 2025-10-31 21:36:59
+Generated on: 2025-11-01 16:58:37
 
 BLT MODEL TUNING RESULTS
 ----------------------------------------
 
-Status: Incomplete
-Completed runs: 10 / 12
-Best score: -0.1311
+Status: Completed
+Completed runs: 6 / 6
+Best score: -1.2443
 Best parameters:
   lr: 0.001
   d_model: 256
   nhead: 8
-  num_layers: 3
+  num_layers: 2
   dim_feedforward: 512
-  dropout: 0.2
-  batch_size: 16
+  dropout: 0.1
+  batch_size: 64
 
 Performance Statistics:
-  Score range: -2.6717 to -0.1311
-  Average score: -1.7433
-  Train loss range: 0.3437 to 2.6920
+  Score range: -3.0067 to -1.2443
+  Average score: -2.0401
+  Train loss range: 1.4970 to 3.0113
 
 
 BASELINE MODEL TUNING RESULTS
 ----------------------------------------
 
-No tuning results found
+Status: Completed
+Completed runs: 6 / 6
+Best score: -1.2561
+Best parameters:
+  lr: 0.001
+  d_model: 256
+  nhead: 8
+  num_layers: 2
+  dim_feedforward: 512
+  dropout: 0.1
+  batch_size: 64
+
+Performance Statistics:
+  Score range: -3.0073 to -1.2561
+  Average score: -2.1609
+  Train loss range: 1.5470 to 3.0126
 

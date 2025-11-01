@@ -2,35 +2,35 @@
 BLT vs BASELINE: COMPREHENSIVE ANALYSIS REPORT
 ================================================================================
 
-Generated on: 2025-10-31 21:58:20
+Generated on: 2025-11-01 17:01:33
 
 MODEL PERFORMANCE SUMMARY
 ----------------------------------------
 
-Exact Match Accuracy     : BLT      0.00% | Baseline      0.00% | Diff   +0.00%
-Character Accuracy       : BLT     13.17% | Baseline     11.60% | Diff   +1.57%
-Average Edit Distance    : BLT      46.27 | Baseline      47.20 | Diff    -0.93
+Exact Match Accuracy     : BLT     48.90% | Baseline     75.15% | Diff  -26.25%
+Character Accuracy       : BLT     74.91% | Baseline     86.16% | Diff  -11.25%
+Average Edit Distance    : BLT       2.08 | Baseline       1.05 | Diff    +1.03
 Total Samples            : BLT       2000 | Baseline       2000 | Diff       +0
-Correct Predictions      : BLT          0 | Baseline          0 | Diff       +0
+Correct Predictions      : BLT        978 | Baseline       1503 | Diff     -525
 
 HYPERPARAMETER TUNING SUMMARY
 ----------------------------------------
 
 BLT Model:
-  Combinations tested: 10
-  Best score: -0.1311
+  Combinations tested: 6
+  Best score: -1.2443
   Best parameters:
     lr: 0.001
     d_model: 256
     nhead: 8
-    num_layers: 3
+    num_layers: 2
     dim_feedforward: 512
-    dropout: 0.2
-    batch_size: 16
+    dropout: 0.1
+    batch_size: 64
 
 Baseline Model:
   Combinations tested: 6
-  Best score: -1.2446
+  Best score: -1.2561
   Best parameters:
     lr: 0.001
     d_model: 256
@@ -44,31 +44,31 @@ TRAINING ANALYSIS
 ----------------------------------------
 
 BLT Training:
-  Final loss: 2.0754
-  Loss improvement: 0.4423
-  Total training time: 719.8s
-  Average epoch time: 359.9s
+  Final loss: 0.0845
+  Loss improvement: 2.3805
+  Total training time: 4203.4s
+  Average epoch time: 420.3s
 
 Baseline Training:
-  Final loss: 2.1124
-  Loss improvement: 0.4347
-  Total training time: 45.6s
-  Average epoch time: 22.8s
+  Final loss: 0.0847
+  Loss improvement: 2.4347
+  Total training time: 447.4s
+  Average epoch time: 44.7s
 
 STATISTICAL ANALYSIS
 ----------------------------------------
 
-Accuracy difference: 0.00%
-Standard error: 0.00%
-Z-score: 0.00
-P-value: 1.0000
-Significance (α=0.05): Not Significant
+Accuracy difference: 26.25%
+Standard error: 1.53%
+Z-score: 17.10
+P-value: 0.0000
+Significance (α=0.05): Highly Significant
 
 KEY FINDINGS
 ----------------------------------------
 
-• BLT and baseline show comparable performance (difference: 0.00%)
-• BLT produces outputs closer to targets (avg edit distance: 46.27 vs 47.20)
+• Baseline outperforms BLT by 26.25% in exact match accuracy
+• Baseline produces outputs closer to targets (avg edit distance: 1.05 vs 2.08)
 
 ================================================================================
 END OF ANALYSIS REPORT
