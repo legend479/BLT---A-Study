@@ -1,0 +1,18 @@
+{
+  "mode": "char",
+  "processed_file": "data/processed/train_char.pt",
+  "tokenizer_path": "data/processed/tokenizer_char.json",
+  "W": 10,
+  "entropy_threshold": 2.0,
+  "max_patch_len": 15,
+  "buckets": 4096,
+  "seed": 1337,
+  "ngrams": [
+    1,
+    2,
+    3
+  ],
+  "num_rows": 10000,
+  "num_processed": 10000,
+  "strict_ascii": false
+}

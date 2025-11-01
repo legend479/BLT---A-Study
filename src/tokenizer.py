@@ -150,16 +150,22 @@ class Tokenizer:
         return "".join(chars)
 
     def save(self, path: str) -> None:
-        d = self.to_dict()
-        os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(d, f, ensure_ascii=False, indent=2)
+        try:
+            d = self.to_dict()
+            os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(d, f, ensure_ascii=False, indent=2)
+        except (IOError, OSError) as e:
+            raise ValueError(f"Error saving tokenizer to {path}: {e}")
 
     @classmethod
     def load(cls, path: str) -> "Tokenizer":
-        with open(path, "r", encoding="utf-8") as f:
-            d = json.load(f)
-        return cls.from_dict(d)
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                d = json.load(f)
+            return cls.from_dict(d)
+        except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
+            raise ValueError(f"Error loading tokenizer from {path}: {e}")
 
     def to_dict(self) -> Dict[str, Any]:
         return {

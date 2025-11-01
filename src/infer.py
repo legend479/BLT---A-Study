@@ -2,6 +2,7 @@
 """Interactive inference for BLT and Baseline models."""
 
 import argparse
+import json
 import torch
 from tokenizer import Tokenizer
 from baseline_model import BaselineModel
@@ -32,7 +33,7 @@ def prepare_char_input(text: str, tokenizer: Tokenizer, device):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", type=str, required=True, choices=["blt", "char"])
+    parser.add_argument("--mode", type=str, required=True, choices=["blt", "char", "baseline"])
     parser.add_argument("--checkpoint", type=str, required=True)
     parser.add_argument("--tokenizer", type=str, default=None)
     parser.add_argument("--max_len", type=int, default=256)
@@ -40,15 +41,27 @@ def main():
     parser.add_argument("--length_penalty", type=float, default=1.0)
     args = parser.parse_args()
     
+    # Map baseline mode to char for internal processing
+    internal_mode = "char" if args.mode == "baseline" else args.mode
+    
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    checkpoint = torch.load(args.checkpoint, map_location=device)
-    model_args = checkpoint.get("args", {})
     
-    tokenizer_path = args.tokenizer or f"data/processed/tokenizer_{args.mode}.json"
-    tokenizer = Tokenizer.load(tokenizer_path)
-    vocab_size = tokenizer.vocab_size
+    try:
+        checkpoint = torch.load(args.checkpoint, map_location=device)
+        model_args = checkpoint.get("args", {})
+    except (FileNotFoundError, RuntimeError) as e:
+        print(f"Error loading checkpoint: {e}")
+        return
     
-    if args.mode == "char":
+    tokenizer_path = args.tokenizer or f"data/processed/tokenizer_{internal_mode}.json"
+    try:
+        tokenizer = Tokenizer.load(tokenizer_path)
+        vocab_size = tokenizer.vocab_size
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"Error loading tokenizer: {e}")
+        return
+    
+    if internal_mode == "char":
         model = BaselineModel(vocab_size=vocab_size, d_model=model_args.get("d_model", 128),
                              nhead=model_args.get("nhead", 4), num_encoder_layers=model_args.get("num_encoder_layers", 2),
                              num_decoder_layers=model_args.get("num_decoder_layers", 2),
@@ -59,9 +72,13 @@ def main():
                         num_decoder_layers=model_args.get("num_decoder_layers", 2),
                         dim_feedforward=model_args.get("dim_feedforward", 256), dropout=0.0)
     
-    model.load_state_dict(checkpoint["model_state_dict"])
-    model = model.to(device)
-    model.eval()
+    try:
+        model.load_state_dict(checkpoint["model_state_dict"])
+        model = model.to(device)
+        model.eval()
+    except (KeyError, RuntimeError) as e:
+        print(f"Error loading model state: {e}")
+        return
     
     print(f"Model loaded. Beam width: {args.beam_width}")
     print("Type 'quit' to exit\n")
@@ -74,7 +91,7 @@ def main():
             continue
         
         try:
-            if args.mode == "char":
+            if internal_mode == "char":
                 input_ids, input_mask = prepare_char_input(text, tokenizer, device)
                 if args.beam_width > 1:
                     decoded_ids = model.beam_search_decode(input_ids, input_mask, tokenizer.sos_id,

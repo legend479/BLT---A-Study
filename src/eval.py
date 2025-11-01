@@ -9,6 +9,7 @@ Usage:
 
 import argparse
 import os
+import json
 import pandas as pd
 import torch
 from tqdm import tqdm
@@ -101,7 +102,7 @@ def compute_edit_distance(s1, s2):
 
 def main():
     parser = argparse.ArgumentParser(description="Evaluate model and generate predictions")
-    parser.add_argument("--mode", type=str, required=True, choices=["blt", "char"])
+    parser.add_argument("--mode", type=str, required=True, choices=["blt", "char", "baseline"])
     parser.add_argument("--checkpoint", type=str, required=True)
     parser.add_argument("--test_csv", type=str, required=True)
     parser.add_argument("--tokenizer", type=str, default=None)
@@ -113,27 +114,38 @@ def main():
     parser.add_argument("--num_workers", type=int, default=4)
     args = parser.parse_args()
     
+    # Map baseline mode to char for internal processing
+    internal_mode = "char" if args.mode == "baseline" else args.mode
+    
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}\n")
     
-    # Load checkpoint
+    # Load checkpoint with error handling
     print(f"Loading checkpoint from {args.checkpoint}...")
-    checkpoint = torch.load(args.checkpoint, map_location=device)
-    model_args = checkpoint.get("args", {})
+    try:
+        checkpoint = torch.load(args.checkpoint, map_location=device)
+        model_args = checkpoint.get("args", {})
+    except (FileNotFoundError, RuntimeError) as e:
+        print(f"Error loading checkpoint: {e}")
+        return
     
-    # Load tokenizer
-    tokenizer_path = args.tokenizer or f"data/processed/tokenizer_{args.mode}.json"
+    # Load tokenizer with error handling
+    tokenizer_path = args.tokenizer or f"data/processed/tokenizer_{internal_mode}.json"
     print(f"Loading tokenizer from {tokenizer_path}...")
-    tokenizer = Tokenizer.load(tokenizer_path)
-    vocab_size = tokenizer.vocab_size
+    try:
+        tokenizer = Tokenizer.load(tokenizer_path)
+        vocab_size = tokenizer.vocab_size
+    except (FileNotFoundError, json.JSONDecodeError) as e:
+        print(f"Error loading tokenizer: {e}")
+        return
     
     # Preprocess test data
     print(f"\nPreprocessing test data...")
-    test_pt = f"data/processed/test_{args.mode}.pt"
+    test_pt = f"data/processed/test_{internal_mode}.pt"
     test_pt, _ = preprocess_csv_to_pt(
         csv_path=args.test_csv,
         out_pt=test_pt,
-        mode=args.mode,
+        mode=internal_mode,
         tokenizer=tokenizer,
         W=10,
         entropy_threshold=2.0,
@@ -142,13 +154,13 @@ def main():
         seed=1337,
         ngrams=(1, 2, 3),
         force_rebuild=False,
-        manifest_out=f"data/processed/test_{args.mode}_manifest.json",
+        manifest_out=f"data/processed/test_{internal_mode}_manifest.json",
         tokenizer_out=tokenizer_path,
         strict_ascii=False
     )
     
     # Create dataset and dataloader
-    if args.mode == "blt":
+    if internal_mode == "blt":
         test_ds = BLTProcessedDataset(test_pt)
     else:
         test_ds = CharProcessedDataset(test_pt)
@@ -158,12 +170,12 @@ def main():
         batch_size=args.batch_size,
         shuffle=False,
         num_workers=args.num_workers,
-        collate_fn=lambda b: collate_fn(b, mode=args.mode, pad_id=tokenizer.pad_id)
+        collate_fn=lambda b: collate_fn(b, mode=internal_mode, pad_id=tokenizer.pad_id)
     )
     
     # Create model
     print(f"Creating {args.mode.upper()} model...")
-    if args.mode == "char":
+    if internal_mode == "char":
         model = BaselineModel(
             vocab_size=vocab_size,
             d_model=model_args.get("d_model", 128),
@@ -187,9 +199,13 @@ def main():
             ngrams=(1, 2, 3)
         )
     
-    model.load_state_dict(checkpoint["model_state_dict"])
-    model = model.to(device)
-    model.eval()
+    try:
+        model.load_state_dict(checkpoint["model_state_dict"])
+        model = model.to(device)
+        model.eval()
+    except (KeyError, RuntimeError) as e:
+        print(f"Error loading model state: {e}")
+        return
     
     print(f"Model parameters: {sum(p.numel() for p in model.parameters()):,}")
     print(f"Beam width: {args.beam_width}\n")
@@ -200,13 +216,17 @@ def main():
     all_targets = []
     all_inputs = []
     
+    # Clear cache before evaluation
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+    
     with torch.no_grad():
         for batch in tqdm(test_loader, desc="Evaluating"):
             raw_inputs = batch["raw_inputs"]
             
-            if args.mode == "char":
-                input_ids = batch["input_ids"].to(device)
-                input_mask = batch["input_mask"].to(device)
+            if internal_mode == "char":
+                input_ids = batch["input_ids"].to(device, non_blocking=True)
+                input_mask = batch["input_mask"].to(device, non_blocking=True)
                 
                 if args.beam_width > 1:
                     decoded_ids_batch = model.beam_search_decode(
@@ -226,7 +246,7 @@ def main():
                     )
             else:
                 patches = batch["patches"]
-                patch_mask = batch["patch_mask"].to(device)
+                patch_mask = batch["patch_mask"].to(device, non_blocking=True)
                 
                 if args.beam_width > 1:
                     decoded_ids_batch = model.beam_search_decode(
@@ -258,6 +278,11 @@ def main():
                 all_targets.append(tgt_text)
             
             all_inputs.extend(raw_inputs)
+            
+            # Clear variables to free memory
+            del batch, target_ids, decoded_ids_batch
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
     
     # Compute metrics
     print("\nComputing metrics...")

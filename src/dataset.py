@@ -25,6 +25,7 @@ from __future__ import annotations
 import os
 import sys
 import json
+import pickle
 from typing import List, Dict, Any, Optional, Tuple
 import numpy as np
 import torch
@@ -136,7 +137,12 @@ def preprocess_csv_to_pt(
                 stats["num_skipped"] += 1
                 continue
             else:
+                # Replace non-ASCII with '?' and continue
                 inp_bytes = inp.encode("ascii", errors="replace")
+        except Exception as e:
+            print(f"[preprocess] Unexpected encoding error for input {inp!r}: {e}")
+            stats["num_skipped"] += 1
+            continue
 
         # tokenize target with tokenizer (add SOS/EOS)
         try:
@@ -236,7 +242,10 @@ class BLTProcessedDataset(Dataset):
     def __init__(self, processed_pt_path: str):
         if not os.path.exists(processed_pt_path):
             raise FileNotFoundError(f"Processed file not found: {processed_pt_path}")
-        self.samples: List[Dict[str, Any]] = torch.load(processed_pt_path)
+        try:
+            self.samples: List[Dict[str, Any]] = torch.load(processed_pt_path, weights_only=False)
+        except (RuntimeError, pickle.UnpicklingError) as e:
+            raise RuntimeError(f"Error loading processed dataset: {e}")
 
     def __len__(self):
         return len(self.samples)
@@ -250,7 +259,10 @@ class CharProcessedDataset(Dataset):
     def __init__(self, processed_pt_path: str):
         if not os.path.exists(processed_pt_path):
             raise FileNotFoundError(f"Processed file not found: {processed_pt_path}")
-        self.samples: List[Dict[str, Any]] = torch.load(processed_pt_path)
+        try:
+            self.samples: List[Dict[str, Any]] = torch.load(processed_pt_path, weights_only=False)
+        except (RuntimeError, pickle.UnpicklingError) as e:
+            raise RuntimeError(f"Error loading processed dataset: {e}")
 
     def __len__(self):
         return len(self.samples)
@@ -326,7 +338,18 @@ def collate_fn(batch: List[Dict[str, Any]], mode: str = "blt", pad_id: int = 0) 
         row_patches: List[Dict[int, np.ndarray]] = []
         for p_idx in range(max_patches):
             if p_idx < len(patches):
-                row_patches.append(patches[p_idx])  # dict {n: np.array}
+                # Optimized per-patch tensor conversion
+                raw_patch = patches[p_idx]  # dict {n: np.array}
+                patch_t: Dict[int, np.ndarray] = {}  # Keep as numpy for now, convert in model
+                for n_key, arr in raw_patch.items():
+                    # Efficient numpy array handling
+                    if isinstance(arr, np.ndarray):
+                        if arr.dtype != np.int32:
+                            arr = arr.astype(np.int32)
+                        patch_t[int(n_key)] = arr
+                    else:
+                        patch_t[int(n_key)] = np.array(arr, dtype=np.int32)
+                row_patches.append(patch_t)
                 patch_mask[i, p_idx] = True
             else:
                 # placeholder for missing patch (empty dict)
@@ -363,7 +386,7 @@ def make_dataloaders(
 
     train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=shuffle,
                               num_workers=num_workers, collate_fn=lambda b: collate_fn(b, mode=mode, pad_id=pad_id),
-                              pin_memory=True)
+                              pin_memory=True, persistent_workers=num_workers > 0, prefetch_factor=2)
 
     val_loader = None
     if val_pt:
@@ -373,7 +396,7 @@ def make_dataloaders(
             val_ds = CharProcessedDataset(val_pt)
         val_loader = DataLoader(val_ds, batch_size=batch_size, shuffle=False,
                                 num_workers=num_workers, collate_fn=lambda b: collate_fn(b, mode=mode, pad_id=pad_id),
-                                pin_memory=True)
+                                pin_memory=True, persistent_workers=num_workers > 0, prefetch_factor=2)
 
     return train_loader, val_loader
 

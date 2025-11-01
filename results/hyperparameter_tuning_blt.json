@@ -1,0 +1,178 @@
+{
+  "mode": "blt",
+  "tune_epochs": 3,
+  "total_combinations": 12,
+  "successful_runs": 10,
+  "best_params": {
+    "lr": 0.001,
+    "d_model": 256,
+    "nhead": 8,
+    "num_layers": 3,
+    "dim_feedforward": 512,
+    "dropout": 0.2,
+    "batch_size": 16
+  },
+  "best_score": -0.1310969215631485,
+  "all_results": [
+    {
+      "params": {
+        "lr": 0.002,
+        "d_model": 256,
+        "nhead": 8,
+        "num_layers": 3,
+        "dim_feedforward": 512,
+        "dropout": 0.2,
+        "batch_size": 64
+      },
+      "train_loss": 2.692016474000967,
+      "val_loss": 2.671698398888111,
+      "score": -2.671698398888111,
+      "train_time": 1368.8313076496124,
+      "epochs_completed": 3
+    },
+    {
+      "params": {
+        "lr": 0.001,
+        "d_model": 64,
+        "nhead": 4,
+        "num_layers": 2,
+        "dim_feedforward": 128,
+        "dropout": 0.2,
+        "batch_size": 32
+      },
+      "train_loss": 2.442569765420006,
+      "val_loss": 2.3929755006517683,
+      "score": -2.3929755006517683,
+      "train_time": 1022.7770895957947,
+      "epochs_completed": 3
+    },
+    {
+      "params": {
+        "lr": 0.002,
+        "d_model": 256,
+        "nhead": 8,
+        "num_layers": 3,
+        "dim_feedforward": 512,
+        "dropout": 0.2,
+        "batch_size": 64
+      },
+      "train_loss": 2.6761553181204825,
+      "val_loss": 2.6379592940211296,
+      "score": -2.6379592940211296,
+      "train_time": 1351.8857123851776,
+      "epochs_completed": 3
+    },
+    {
+      "params": {
+        "lr": 0.002,
+        "d_model": 256,
+        "nhead": 4,
+        "num_layers": 2,
+        "dim_feedforward": 512,
+        "dropout": 0.2,
+        "batch_size": 64
+      },
+      "train_loss": 0.823368721706852,
+      "val_loss": 0.3803366255015135,
+      "score": -0.3803366255015135,
+      "train_time": 1238.7281222343445,
+      "epochs_completed": 3
+    },
+    {
+      "params": {
+        "lr": 0.001,
+        "d_model": 256,
+        "nhead": 8,
+        "num_layers": 3,
+        "dim_feedforward": 512,
+        "dropout": 0.2,
+        "batch_size": 16
+      },
+      "train_loss": 0.34369208641052246,
+      "val_loss": 0.1310969215631485,
+      "score": -0.1310969215631485,
+      "train_time": 1210.9998211860657,
+      "epochs_completed": 3
+    },
+    {
+      "params": {
+        "lr": 0.0005,
+        "d_model": 128,
+        "nhead": 4,
+        "num_layers": 2,
+        "dim_feedforward": 128,
+        "dropout": 0.1,
+        "batch_size": 16
+      },
+      "train_loss": 1.8894766225814819,
+      "val_loss": 1.6984581499099731,
+      "score": -1.6984581499099731,
+      "train_time": 1029.968641757965,
+      "epochs_completed": 3
+    },
+    {
+      "params": {
+        "lr": 0.002,
+        "d_model": 64,
+        "nhead": 4,
+        "num_layers": 2,
+        "dim_feedforward": 512,
+        "dropout": 0.2,
+        "batch_size": 32
+      },
+      "train_loss": 2.1496178174552063,
+      "val_loss": 1.9399771047016932,
+      "score": -1.9399771047016932,
+      "train_time": 1031.375724554062,
+      "epochs_completed": 3
+    },
+    {
+      "params": {
+        "lr": 0.0005,
+        "d_model": 256,
+        "nhead": 8,
+        "num_layers": 2,
+        "dim_feedforward": 512,
+        "dropout": 0.1,
+        "batch_size": 32
+      },
+      "train_loss": 1.4494217203828854,
+      "val_loss": 1.1800700085503715,
+      "score": -1.1800700085503715,
+      "train_time": 1125.205961227417,
+      "epochs_completed": 3
+    },
+    {
+      "params": {
+        "lr": 0.0005,
+        "d_model": 128,
+        "nhead": 8,
+        "num_layers": 3,
+        "dim_feedforward": 128,
+        "dropout": 0.2,
+        "batch_size": 64
+      },
+      "train_loss": 2.424760581581456,
+      "val_loss": 2.3828441202640533,
+      "score": -2.3828441202640533,
+      "train_time": 1199.4725704193115,
+      "epochs_completed": 3
+    },
+    {
+      "params": {
+        "lr": 0.001,
+        "d_model": 64,
+        "nhead": 4,
+        "num_layers": 2,
+        "dim_feedforward": 512,
+        "dropout": 0.2,
+        "batch_size": 16
+      },
+      "train_loss": 2.1956807518005372,
+      "val_loss": 2.017100524902344,
+      "score": -2.017100524902344,
+      "train_time": 1039.6927092075348,
+      "epochs_completed": 3
+    }
+  ]
+}

@@ -1,8 +1,8 @@
 # src/blt_model.py
 """
-BLT PoC model implementation.
+BLT PoC model implementation with optimizations.
 
-- PatchEmbedder: builds patch embeddings from per-n bucket IDs
+- PatchEmbedder: builds patch embeddings from per-n bucket IDs (optimized)
 - BLTModel: encoder-decoder transformer using patch embeddings as input memory
 """
 
@@ -17,6 +17,7 @@ import numpy as np
 class PatchEmbedder(nn.Module):
     """
     Converts patch bucket dicts {n: np.array(bucket_ids)} into patch embeddings.
+    Optimized with vectorized processing for better performance.
 
     For each n in (1,2,3) it has an nn.Embedding(buckets, d_model).
     For each patch: embedding = sum_n ( sum_{id in bucket_ids} Emb_n[id] ).
@@ -33,6 +34,8 @@ class PatchEmbedder(nn.Module):
 
     def forward(self, patches_nested: List[List[Dict[int, np.ndarray]]], patch_mask: torch.Tensor) -> torch.Tensor:
         """
+        Optimized forward pass using vectorized batch processing.
+        
         Args:
             patches_nested: list of length B; each element is a list of length P;
                             each [p] is dict {n: np.array(bucket_ids)}.
@@ -42,29 +45,93 @@ class PatchEmbedder(nn.Module):
             patch_embs: Tensor [B, P, d_model] with embeddings for each patch.
         """
         B, P = patch_mask.shape
-        device = next(self.parameters()).device
-        dtype = next(self.parameters()).dtype
+        device = patch_mask.device
+        dtype = next(iter(self.emb_tables.values())).weight.dtype
         out = torch.zeros((B, P, self.d_model), device=device, dtype=dtype)
 
-        for b in range(B):
-            for p in range(P):
-                if not patch_mask[b, p]:
-                    continue
-                patch = patches_nested[b][p]
-                emb_sum = torch.zeros((self.d_model,), device=device, dtype=dtype)
-                for n in self.ngrams:
+        # Optimized: Process each n-gram size with vectorization
+        for n in self.ngrams:
+            n_str = str(n)
+            if n_str not in self.emb_tables:
+                continue
+                
+            # Collect all bucket IDs for this n-gram size across all valid patches
+            all_ids = []
+            positions = []  # (batch_idx, patch_idx) for each ID group
+            
+            for b in range(B):
+                for p in range(P):
+                    if not patch_mask[b, p]:
+                        continue
+                    patch = patches_nested[b][p]
                     ids = patch.get(n, None)
                     if ids is None or len(ids) == 0:
                         continue
-                    ids_t = torch.as_tensor(ids, device=device, dtype=torch.long)
-                    emb_sum = emb_sum + self.emb_tables[str(n)](ids_t).sum(dim=0)
-                out[b, p] = emb_sum
+                    
+                    # Convert to tensor and move to device efficiently
+                    if isinstance(ids, np.ndarray):
+                        ids_t = torch.from_numpy(ids).long()
+                        # Only pin memory if not already on GPU and memory is available
+                        if device.type == 'cuda' and ids_t.device.type == 'cpu':
+                            try:
+                                ids_t = ids_t.pin_memory()
+                            except (RuntimeError, AttributeError):
+                                pass
+                        ids_t = ids_t.to(device, non_blocking=True)
+                    elif isinstance(ids, torch.Tensor):
+                        ids_t = ids.long()
+                        if ids_t.device != device:
+                            ids_t = ids_t.to(device, non_blocking=True)
+                    else:
+                        ids_t = torch.tensor(list(ids), dtype=torch.long, device=device)
+                    
+                    all_ids.append(ids_t)
+                    positions.append((b, p))
+            
+            if not all_ids:
+                continue
+                
+            # Vectorized processing: concatenate all IDs and get embeddings in one batch
+            try:
+                concat_ids = torch.cat(all_ids, dim=0)
+                concat_embs = self.emb_tables[n_str](concat_ids)  # [total_ids, d_model]
+                
+                # Efficiently accumulate embeddings back to their positions
+                start_idx = 0
+                for i, (b, p) in enumerate(positions):
+                    num_ids = len(all_ids[i])
+                    if num_ids > 0:
+                        patch_embs = concat_embs[start_idx:start_idx + num_ids]
+                        out[b, p] += patch_embs.sum(dim=0)
+                        start_idx += num_ids
+                        
+            except Exception as e:
+                # Fallback to sequential processing if vectorization fails
+                print(f"Warning: Vectorized processing failed for n={n}, using fallback: {e}")
+                for b in range(B):
+                    for p in range(P):
+                        if not patch_mask[b, p]:
+                            continue
+                        patch = patches_nested[b][p]
+                        ids = patch.get(n, None)
+                        if ids is None or len(ids) == 0:
+                            continue
+                        
+                        if isinstance(ids, np.ndarray):
+                            ids_t = torch.from_numpy(ids).long().to(device, non_blocking=True)
+                        elif isinstance(ids, torch.Tensor):
+                            ids_t = ids.long().to(device, non_blocking=True)
+                        else:
+                            ids_t = torch.tensor(list(ids), dtype=torch.long, device=device)
+                        
+                        out[b, p] += self.emb_tables[n_str](ids_t).sum(dim=0)
+        
         return out
 
 
 class BLTModel(nn.Module):
     """
-    BLT encoder-decoder transformer model.
+    BLT encoder-decoder transformer model with optimizations.
 
     - Encoder: patch embeddings -> TransformerEncoder
     - Decoder: char tokens -> TransformerDecoder
@@ -117,7 +184,7 @@ class BLTModel(nn.Module):
         target_mask: torch.Tensor
     ) -> torch.Tensor:
         """
-        Forward training pass.
+        Forward training pass with optimizations.
 
         Args:
             patches_nested: nested patch structure (list of list of dicts)
@@ -129,9 +196,9 @@ class BLTModel(nn.Module):
             logits: FloatTensor [B, T, vocab_size]
         """
         B, T = target_ids.shape
-        device = next(self.parameters()).device
+        device = target_ids.device
 
-        # Encoder: patch embeddings
+        # Encoder: patch embeddings (optimized)
         patch_embs = self.patch_embedder(patches_nested, patch_mask)  # [B,P,d]
         P = patch_embs.size(1)
         pos_ids = torch.arange(P, device=device).unsqueeze(0).expand(B, P)
@@ -164,14 +231,14 @@ class BLTModel(nn.Module):
         max_len: int = 128,
     ) -> List[List[int]]:
         """
-        Greedy autoregressive decoding.
+        Greedy autoregressive decoding with optimizations.
 
         Returns: list of decoded ID lists (without SOS, stops at EOS if encountered).
         """
         B = len(patches_nested)
-        device = next(self.parameters()).device
+        device = patch_mask.device
 
-        # Encoder memory
+        # Encoder memory (optimized)
         patch_embs = self.patch_embedder(patches_nested, patch_mask)
         P = patch_embs.size(1)
         pos_ids = torch.arange(P, device=device).unsqueeze(0).expand(B, P)
@@ -223,13 +290,13 @@ class BLTModel(nn.Module):
         length_penalty: float = 1.0
     ) -> List[List[int]]:
         """
-        Beam search decoding for BLTModel.
+        Beam search decoding for BLTModel with optimizations.
         Returns list of decoded ID lists (without SOS, stops at EOS if encountered).
         """
         B = len(patches_nested)
-        device = next(self.parameters()).device
+        device = patch_mask.device
 
-        # Encoder memory
+        # Encoder memory (optimized)
         patch_embs = self.patch_embedder(patches_nested, patch_mask)
         P = patch_embs.size(1)
         pos_ids = torch.arange(P, device=device).unsqueeze(0).expand(B, P)
