@@ -2,12 +2,12 @@
 BLT vs BASELINE: COMPREHENSIVE EXPERIMENTAL REPORT
 ================================================================================
 
-Generated on: 2025-11-01 17:01:24
-Total experiment time: 0.0 seconds
+Generated on: 2025-11-02 15:50:18
+Total experiment time: 5659.2 seconds
 
 EXPERIMENTAL CONFIGURATION
 --------------------------------------------------------------------------------
-Training epochs: 100
+Training epochs: 5
 Evaluation beam width: 5
 Hyperparameter tuning: No
 
@@ -16,39 +16,39 @@ MODEL PERFORMANCE RESULTS
 
 Metric                    BLT             Baseline        Difference     
 ----------------------------------------------------------------------
-Exact Match Accuracy      48.90%          75.15%          -26.25%        
-Character Accuracy        74.91%          86.16%          -11.25%        
-Avg Edit Distance         2.08            1.05            +1.03          
-Max Edit Distance         141.00          143.00          -2.00          
-Avg Length Diff           0.61            0.37            +0.24          
-Evaluation Time           0.00s           0.00s           +0.00s         
+Exact Match Accuracy      76.70%          99.45%          -22.75%        
+Character Accuracy        90.60%          99.42%          -8.83%         
+Avg Edit Distance         0.61            0.01            +0.60          
+Max Edit Distance         22.00           7.00            +15.00         
+Avg Length Diff           0.18            0.01            +0.17          
+Evaluation Time           1959.42s        3699.74s        -1740.31s      
 
 Total Test Samples: 2000
-BLT Correct: 978
-Baseline Correct: 1503
+BLT Correct: 1534
+Baseline Correct: 1989
 
 PERFORMANCE BY INPUT LENGTH
 --------------------------------------------------------------------------------
 Length Range    BLT Acc      Baseline Acc    Difference   Samples   
 ----------------------------------------------------------------
-0-20             36.84%      97.37%        -60.53%         38
-100-200          32.90%      49.89%        -16.99%        465
-20-50            57.38%      90.22%        -32.84%        542
-50-100           52.36%      78.01%        -25.65%        955
+0-20             71.05%     100.00%        -28.95%         38
+100-200          72.47%      98.49%        -26.02%        465
+20-50            76.38%     100.00%        -23.62%        542
+50-100           79.16%      99.58%        -20.42%        955
 
 STATISTICAL ANALYSIS
 --------------------------------------------------------------------------------
 
-Accuracy Difference: 26.25%
-Standard Error: 1.48%
-Z-Score: 17.77
+Accuracy Difference: 22.75%
+Standard Error: 0.96%
+Z-Score: 23.71
 Significance (α=0.05): Highly Significant
 
 KEY FINDINGS
 --------------------------------------------------------------------------------
 
-• Baseline outperforms BLT by 26.25% in exact match accuracy
-• Performance improves on longer sequences (0-20: 36.8% vs 50-100: 52.4%)
+• Baseline outperforms BLT by 22.75% in exact match accuracy
+• Performance improves on longer sequences (0-20: 71.1% vs 50-100: 79.2%)
 
 CONCLUSIONS
 --------------------------------------------------------------------------------

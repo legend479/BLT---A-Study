@@ -1,0 +1,28 @@
+{
+  "exact_match_accuracy": 0.9945,
+  "character_accuracy": 0.9942469505308336,
+  "total_samples": 2000,
+  "total_correct": 1989,
+  "total_incorrect": 11,
+  "avg_edit_distance": 0.0125,
+  "avg_length_diff": 0.0125,
+  "max_edit_distance": 7,
+  "accuracy_by_length": {
+    "0-20": {
+      "accuracy": 1.0,
+      "count": 38
+    },
+    "20-50": {
+      "accuracy": 1.0,
+      "count": 542
+    },
+    "50-100": {
+      "accuracy": 0.9958115183246073,
+      "count": 955
+    },
+    "100-200": {
+      "accuracy": 0.9849462365591398,
+      "count": 465
+    }
+  }
+}

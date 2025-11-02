@@ -923,9 +923,9 @@ def main():
     elif args.quick:
         epochs = 2
     elif args.full:
-        epochs = 500
+        epochs = 10
     elif args.tune:
-        epochs = 100  # Full training after tuning
+        epochs = 10  # Full training after tuning
     else:
         epochs = 5  # default
     

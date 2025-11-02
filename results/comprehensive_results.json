@@ -229,70 +229,72 @@
       ]
     },
     "blt": {
-      "exact_match_accuracy": 0.489,
-      "character_accuracy": 0.7491367124039131,
+      "exact_match_accuracy": 0.767,
+      "character_accuracy": 0.9059525741337829,
       "total_samples": 2000,
-      "total_correct": 978,
-      "total_incorrect": 1022,
-      "avg_edit_distance": 2.079,
-      "avg_length_diff": 0.609,
-      "max_edit_distance": 141,
+      "total_correct": 1534,
+      "total_incorrect": 466,
+      "avg_edit_distance": 0.6145,
+      "avg_length_diff": 0.1795,
+      "max_edit_distance": 22,
       "accuracy_by_length": {
         "0-20": {
-          "accuracy": 0.3684210526315789,
+          "accuracy": 0.7105263157894737,
           "count": 38
         },
         "20-50": {
-          "accuracy": 0.5738007380073801,
+          "accuracy": 0.7638376383763837,
           "count": 542
         },
         "50-100": {
-          "accuracy": 0.5235602094240838,
+          "accuracy": 0.7916230366492146,
           "count": 955
         },
         "100-200": {
-          "accuracy": 0.32903225806451614,
+          "accuracy": 0.7247311827956989,
           "count": 465
         }
-      }
+      },
+      "eval_time": 1959.4245479106903
     },
     "baseline": {
-      "exact_match_accuracy": 0.7515,
-      "character_accuracy": 0.8615990586312103,
+      "exact_match_accuracy": 0.9945,
+      "character_accuracy": 0.9942469505308336,
       "total_samples": 2000,
-      "total_correct": 1503,
-      "total_incorrect": 497,
-      "avg_edit_distance": 1.051,
-      "avg_length_diff": 0.3725,
-      "max_edit_distance": 143,
+      "total_correct": 1989,
+      "total_incorrect": 11,
+      "avg_edit_distance": 0.0125,
+      "avg_length_diff": 0.0125,
+      "max_edit_distance": 7,
       "accuracy_by_length": {
         "0-20": {
-          "accuracy": 0.9736842105263158,
+          "accuracy": 1.0,
           "count": 38
         },
         "20-50": {
-          "accuracy": 0.9022140221402214,
+          "accuracy": 1.0,
           "count": 542
         },
         "50-100": {
-          "accuracy": 0.7801047120418848,
+          "accuracy": 0.9958115183246073,
           "count": 955
         },
         "100-200": {
-          "accuracy": 0.4989247311827957,
+          "accuracy": 0.9849462365591398,
           "count": 465
         }
-      }
+      },
+      "eval_time": 3699.737297296524
     }
   },
   "config": {
-    "epochs": 100,
+    "epochs": 5,
     "tune_epochs": 3,
     "batch_size": 128,
     "beam_width": 5,
     "tuning_performed": false,
     "max_tune_combinations": 6,
-    "total_time": 0.004201650619506836
+    "total_time": 5659.166768074036
   },
-  "timestamp": "2025-11-01 17:01:24"
+  "timestamp": "2025-11-02 15:50:18"
 }

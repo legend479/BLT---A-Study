@@ -2,16 +2,16 @@
 BLT vs BASELINE: COMPREHENSIVE ANALYSIS REPORT
 ================================================================================
 
-Generated on: 2025-11-01 17:01:33
+Generated on: 2025-11-02 15:50:33
 
 MODEL PERFORMANCE SUMMARY
 ----------------------------------------
 
-Exact Match Accuracy     : BLT     48.90% | Baseline     75.15% | Diff  -26.25%
-Character Accuracy       : BLT     74.91% | Baseline     86.16% | Diff  -11.25%
-Average Edit Distance    : BLT       2.08 | Baseline       1.05 | Diff    +1.03
+Exact Match Accuracy     : BLT     76.70% | Baseline     99.45% | Diff  -22.75%
+Character Accuracy       : BLT     90.60% | Baseline     99.42% | Diff   -8.83%
+Average Edit Distance    : BLT       0.61 | Baseline       0.01 | Diff    +0.60
 Total Samples            : BLT       2000 | Baseline       2000 | Diff       +0
-Correct Predictions      : BLT        978 | Baseline       1503 | Diff     -525
+Correct Predictions      : BLT       1534 | Baseline       1989 | Diff     -455
 
 HYPERPARAMETER TUNING SUMMARY
 ----------------------------------------
@@ -44,31 +44,31 @@ TRAINING ANALYSIS
 ----------------------------------------
 
 BLT Training:
-  Final loss: 0.0845
-  Loss improvement: 2.3805
-  Total training time: 4203.4s
-  Average epoch time: 420.3s
+  Final loss: 0.0259
+  Loss improvement: 0.0748
+  Total training time: 7450.7s
+  Average epoch time: 392.1s
 
 Baseline Training:
-  Final loss: 0.0847
-  Loss improvement: 2.4347
-  Total training time: 447.4s
-  Average epoch time: 44.7s
+  Final loss: 0.0192
+  Loss improvement: 0.0644
+  Total training time: 337.3s
+  Average epoch time: 12.5s
 
 STATISTICAL ANALYSIS
 ----------------------------------------
 
-Accuracy difference: 26.25%
-Standard error: 1.53%
-Z-score: 17.10
+Accuracy difference: 22.75%
+Standard error: 1.02%
+Z-score: 22.20
 P-value: 0.0000
 Significance (α=0.05): Highly Significant
 
 KEY FINDINGS
 ----------------------------------------
 
-• Baseline outperforms BLT by 26.25% in exact match accuracy
-• Baseline produces outputs closer to targets (avg edit distance: 1.05 vs 2.08)
+• Baseline outperforms BLT by 22.75% in exact match accuracy
+• Baseline produces outputs closer to targets (avg edit distance: 0.01 vs 0.61)
 
 ================================================================================
 END OF ANALYSIS REPORT
